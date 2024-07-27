@@ -67,20 +67,46 @@ class MultiCrossAttentionLayer(nn.Module):
             result = scaled_dot_product(
                 query=self.query,
                 key=self.key,
-                value=self.value,
-                mask=self.mask,
+                values=self.value,
                 type="target",
             )
+            result = result.view(
+                result.size(0), result.size(2), result.size(1) * result.size(3)
+            )
+            return self.layer(result)
 
         else:
             raise TypeError("x and y must be torch.Tensor".capitalize())
 
 
 if __name__ == "__main__":
-    attention = MultiCrossAttentionLayer(
-        dimension=512,
-        heads=8,
-        dropout=0.1,
+    parser = argparse.ArgumentParser(
+        description="Multi Cross Attention Layer for Transformer".title()
+    )
+    parser.add_argument(
+        "--dimension", type=int, default=512, help="dimension".capitalize()
+    )
+    parser.add_argument("--heads", type=int, default=8, help="heads".capitalize())
+    parser.add_argument(
+        "--dropout", type=float, default=0.1, help="dropout".capitalize()
     )
 
-    print(attention(torch.randn((40, 200, 512)), torch.randn((40, 200, 512))).size())
+    args = parser.parse_args()
+
+    dimension = args.dimension
+    heads = args.heads
+    dropout = args.dropout
+
+    attention = MultiCrossAttentionLayer(
+        dimension=dimension,
+        heads=heads,
+        dropout=dropout,
+    )
+
+    assert attention(
+        torch.randn((40, 200, dimension)), torch.randn((40, 200, dimension))
+    ).size() == (
+        40,
+        200,
+        dimension,
+    ), "Multi Cross Attention Layer for Transformer is not working properly".capitalize()

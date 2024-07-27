@@ -30,7 +30,9 @@ def scaled_dot_product(
             result += padding_mask(mask=mask)
 
         elif type == "target":
-            result += target_mask(sequence_length=result.size(-1))
+            result += (
+                target_mask(sequence_length=result.size(-1)).unsqueeze(0).unsqueeze(1)
+            )
 
         result = torch.softmax(input=result, dim=-1)
 
