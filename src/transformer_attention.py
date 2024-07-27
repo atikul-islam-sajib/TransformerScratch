@@ -6,7 +6,7 @@ import torch.nn as nn
 
 sys.path.append("/src/")
 
-from mask import padding_mask
+from mask import padding_mask, target_mask
 
 
 def scaled_dot_product(
@@ -29,8 +29,8 @@ def scaled_dot_product(
         if (mask is not None) and (type == "src"):
             result += padding_mask(mask=mask)
 
-        elif (mask is not None) and (type == "target"):
-            result += padding_mask(mask=mask, type="tgt_mask")
+        elif type == "target":
+            result += target_mask(sequence_length=result.size(-1))
 
         result = torch.softmax(input=result, dim=-1)
 
