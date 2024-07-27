@@ -31,7 +31,7 @@ class PositionalEncoding(nn.Module):
                         position / self.constant ** (2 * index / self.model_dimension)
                     )
 
-        self.register_buffer("position_encoding", self.position_encode)
+        self.register_buffer("position_encoding", self.position_encode.unsqueeze(0))
 
         print("Positional Encoding initialized".capitalize())
 
