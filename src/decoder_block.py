@@ -156,3 +156,11 @@ if __name__ == "__main__":
         )
 
         print(f"Model architecture is saved in the path {path}".capitalize())
+import sys
+import torch
+import argparse
+import torch.nn as nn
+
+sys.path.append("/src/")
+
+from encoder import EncoderBlock
