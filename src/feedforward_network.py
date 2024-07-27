@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 import argparse
@@ -6,6 +7,8 @@ from torchsummary import summary
 from torchview import draw_graph
 
 sys.path.append("/src/")
+
+from utils import config
 
 
 class PointWiseFeedForward(nn.Module):
@@ -87,3 +90,11 @@ if __name__ == "__main__":
     )
     if args.display:
         print(summary(model=net, input_size=(200, 512)))
+
+        path = config()["path"]["FILES_PATH"]
+
+        draw_graph(
+            model=net, input_data=torch.randn((40, 200, 512))
+        ).visual_graph.render(
+            filename=os.path.join(path, "feedforward_network"), format="png"
+        )
