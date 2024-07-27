@@ -15,6 +15,7 @@ def scaled_dot_product(
     result = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(
         (query.size(1) * query.size(3))
     )
+
     if mask is not None:
         result += padding_mask(mask=mask)
 

@@ -2,6 +2,10 @@ import sys
 import torch
 import torch.nn as nn
 
+sys.path.append("/src/")
+
+from scaled_dot_product import scaled_dot_product
+
 
 class MultiHeadAttentionLayer(nn.Module):
     def __init__(self, dimension=512, heads: int = 8, dropout: float = 0.1, mask=None):
@@ -18,6 +22,9 @@ class MultiHeadAttentionLayer(nn.Module):
 
         self.QKV = nn.Linear(
             in_features=self.dimension, out_features=3 * self.dimension, bias=False
+        )
+        self.layer = nn.Linear(
+            in_features=self.dimension, out_features=self.dimension, bias=False
         )
 
     def forward(self, x: torch.Tensor):
@@ -49,7 +56,22 @@ class MultiHeadAttentionLayer(nn.Module):
             self.key = self.key.permute(0, 2, 1, 3)
             self.values = self.values.permute(0, 2, 1, 3)
 
-            return self.values
+            try:
+                self.attention = scaled_dot_product(
+                    query=self.query, key=self.key, values=self.values, mask=self.mask
+                )
+
+            except Exception as e:
+                print("An error occured : {}".format(e))
+
+            else:
+                self.attention = self.attention.view(
+                    self.attention.size(0),
+                    self.attention.size(2),
+                    self.attention.size(1) * self.attention.size(3),
+                )
+
+                return self.layer(self.attention)
 
         else:
             raise TypeError("Input must be a torch.Tensor".capitalize())
