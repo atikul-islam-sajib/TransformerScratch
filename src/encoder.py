@@ -2,106 +2,86 @@ import os
 import sys
 import torch
 import argparse
+from tqdm import tqdm
 import torch.nn as nn
-from torchsummary import summary
 from torchview import draw_graph
 
 sys.path.append("/src/")
 
 from utils import config
-from layer_normalization import LayerNormalization
-from feedforward_network import PointWiseFeedForward
-from multihead_attention import MultiHeadAttentionLayer
+from encoder_block import EncoderBlock
 
 
-class EncoderBlock(nn.Module):
+class TransformerEncoder(nn.Module):
     def __init__(
         self,
-        dimension: int = 512,
-        heads: int = 8,
-        feedforward: int = 2048,
+        d_model: int = 512,
+        nhead: int = 8,
+        dim_feedforward: int = 2048,
         dropout: float = 0.1,
-        epsilon: float = 1e-6,
+        layer_norm_eps: float = 1e-6,
         display: bool = False,
     ):
-        super(EncoderBlock, self).__init__()
 
-        self.dimension = dimension
-        self.heads = heads
-        self.feedforward = feedforward
+        super(TransformerEncoder, self).__init__()
+
+        self.dimension = d_model
+        self.heads = nhead
+        self.feedforward = dim_feedforward
         self.dropout = dropout
-        self.epsilon = epsilon
+        self.epsilon = layer_norm_eps
         self.display = display
 
-        self.multihead_attention = MultiHeadAttentionLayer(
-            dimension=self.dimension, heads=self.heads, dropout=self.dropout
-        )
-
-        self.layer_norm = LayerNormalization(
-            normalized_shape=self.dimension, epsilon=self.epsilon
-        )
-
-        self.feedforward_network = PointWiseFeedForward(
-            in_features=self.dimension,
-            out_features=self.feedforward,
-            dropout=self.dropout,
+        self.encoder = nn.Sequential(
+            *[
+                EncoderBlock(
+                    dimension=self.dimension,
+                    heads=self.heads,
+                    feedforward=self.feedforward,
+                    dropout=self.dropout,
+                    epsilon=self.epsilon,
+                )
+                for _ in tqdm(range(self.heads))
+            ]
         )
 
     def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
-            self.mask = mask
-
-            residual = x
-
-            x = self.multihead_attention(x=x, mask=self.mask)
-            x = torch.dropout(input=x, p=self.dropout, train=self.training)
-            x = torch.add(x, residual)
-            x = self.layer_norm(x)
-
-            residual = x
-
-            x = self.feedforward_network(x=x)
-            x = torch.dropout(input=x, p=self.dropout, train=self.training)
-            x = torch.add(residual, x)
-            x = self.layer_norm(x)
-
+            for layer in self.encoder:
+                x = layer(x, mask)
             return x
 
         else:
             raise TypeError("Input must be a tensor".capitalize())
 
+    @staticmethod
+    def display_parameters(model: nn.Module):
+        if isinstance(model, TransformerEncoder):
+            return sum(params.numel() for params in model.parameters())
+
+        else:
+            raise TypeError("Input must be a transformer encoder".capitalize())
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Encoder Block for Transfomers".title()
-    )
-
+    parser = argparse.ArgumentParser(description="Encoder for Transformer".title())
     parser.add_argument(
-        "--dimension",
-        type=int,
-        default=512,
-        help="Dimension of the input tensor".capitalize(),
+        "--d_model", type=int, default=512, help="Dimension of the model".capitalize()
     )
     parser.add_argument(
-        "--heads",
-        type=int,
-        default=8,
-        help="Number of heads in the multi-head attention".capitalize(),
+        "--nhead", type=int, default=8, help="Number of heads".capitalize()
     )
     parser.add_argument(
-        "--feedfoward",
+        "--feedforward",
         type=int,
         default=2048,
-        help="Dimension of the feedforward network".capitalize(),
+        help="Feedforward dimension".capitalize(),
     )
     parser.add_argument(
         "--dropout", type=float, default=0.1, help="Dropout rate".capitalize()
     )
     parser.add_argument(
-        "-eps",
-        type=float,
-        default=1e-6,
-        help="Epsilon value for layer normalization".capitalize(),
+        "--epsilon", type=float, default=1e-6, help="Epsilon for LayerNorm".capitalize()
     )
     parser.add_argument(
         "--display", type=bool, default=False, help="Display the model".capitalize()
@@ -109,38 +89,55 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    dimension = args.dimension
-    heads = args.heads
+    d_model = args.d_model
+    nheads = args.nhead
+    feedforward = args.feedforward
     dropout = args.dropout
-    feedforward = args.feedfoward
-    eps = args.eps
+    epsilon = args.epsilon
     display = args.display
 
-    encoder = EncoderBlock(
-        dimension=dimension,
-        heads=heads,
-        dropout=dropout,
-    )
+    input = torch.randn((40, 200, d_model))
     masked = torch.ones((40, 200))
 
-    assert encoder(torch.randn((40, 200, dimension)), masked).size() == (
+    encoderTransformer = TransformerEncoder(
+        d_model=d_model,
+        nhead=nheads,
+        dim_feedforward=feedforward,
+        dropout=dropout,
+        layer_norm_eps=epsilon,
+        display=display,
+    )
+
+    assert encoderTransformer(input, masked).size() == (
         40,
         200,
-        dimension,
-    ), "Encoder block is not working properl as dimension is not equal".title()
+        d_model,
+    ), "Transformer Encoder block is not working properl as dimension is not equal"
 
     masked = None
 
-    assert encoder(torch.randn((40, 200, dimension))).size() == (
+    assert encoderTransformer(input).size() == (
         40,
         200,
-        dimension,
-    ), "Encoder block is not working properl as dimension is not equal".title()
+        d_model,
+    ), "Transformer Encoder block is not working properl as dimension is not equal"
 
     if display:
+        print(
+            f"Total parameters of the transformer encoder {TransformerEncoder.display_parameters(model=encoderTransformer)}"
+        )
 
-        path = config()["path"]["FILES_PATH"]
+        try:
+            path = config()["path"]["FILES_PATH"]
 
-        draw_graph(
-            model=encoder, input_data=torch.randn((40, 200, dimension))
-        ).visual_graph.render(filename=os.path.join(path, "one_encoder"), format="png")
+            draw_graph(
+                model=encoderTransformer, input_data=torch.randn((40, 200, d_model))
+            ).visual_graph.render(
+                filename=os.path.join(path, "encoderTransformer"), format="png"
+            )
+
+        except Exception as e:
+            print("An error occurred: ", e)
+
+        else:
+            print(f"Encoder Transformer graph saved successfully in the path {path}")
