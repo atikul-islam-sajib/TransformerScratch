@@ -7,6 +7,7 @@ sys.path.append("/src/")
 
 from layer_normalization import LayerNormalization
 from multihead_attention import MultiHeadAttentionLayer
+from encoder_decoder_attention import MultiCrossAttentionLayer
 
 
 class DecoderBlock(nn.Module):
@@ -32,6 +33,10 @@ class DecoderBlock(nn.Module):
             normalized_shape=self.dimension, epsilon=self.epsilon
         )
 
+        self.encoder_deecoder_attention = MultiCrossAttentionLayer(
+            dimension=self.dimension, heads=self.heads, dropout=self.dropout
+        )
+
     def forward(self, x: torch.Tensor, y: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
             residual = y
@@ -43,7 +48,12 @@ class DecoderBlock(nn.Module):
 
             residual = y
 
-            return x
+            y = self.encoder_deecoder_attention(x=x, y=y)
+            y = torch.dropout(input=y, p=self.dropout, train=self.training)
+            y = torch.add(y, residual)
+            y = self.layer_norm(y)
+
+            return y
 
         else:
             raise TypeError("Input must be a torch.Tensor".capitalize())
