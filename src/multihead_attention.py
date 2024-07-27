@@ -1,5 +1,6 @@
 import sys
 import torch
+import argparse
 import torch.nn as nn
 
 sys.path.append("/src/")
@@ -8,13 +9,12 @@ from scaled_dot_product import scaled_dot_product
 
 
 class MultiHeadAttentionLayer(nn.Module):
-    def __init__(self, dimension=512, heads: int = 8, dropout: float = 0.1, mask=None):
+    def __init__(self, dimension=512, heads: int = 8, dropout: float = 0.1):
         super(MultiHeadAttentionLayer, self).__init__()
 
         self.dimension = dimension
         self.heads = heads
         self.dropout = dropout
-        self.mask = mask
 
         assert (
             self.dimension % self.heads == 0
@@ -27,8 +27,10 @@ class MultiHeadAttentionLayer(nn.Module):
             in_features=self.dimension, out_features=self.dimension, bias=False
         )
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor, mask=None):
         if isinstance(x, torch.Tensor):
+            self.mask = mask
+
             QKV = self.QKV(x)
 
             self.query, self.key, self.values = torch.chunk(input=QKV, chunks=3, dim=-1)
@@ -78,6 +80,51 @@ class MultiHeadAttentionLayer(nn.Module):
 
 
 if __name__ == "__main__":
-    multihead = MultiHeadAttentionLayer(dimension=512, heads=8, dropout=0.1, mask=None)
+    parser = argparse.ArgumentParser(
+        description="MultiHeadAttention Layer for Transformer".title()
+    )
+    parser.add_argument(
+        "--dimension",
+        type=int,
+        default=512,
+        help="Dimension of the input tensor".title(),
+    )
+    parser.add_argument(
+        "--heads",
+        type=int,
+        default=8,
+        help="Number of heads for the multihead attention".title(),
+    )
+    parser.add_argument(
+        "--dropout",
+        type=float,
+        default=0.1,
+        help="Dropout rate for the multihead attention".title(),
+    )
 
-    print(multihead(torch.randn(40, 200, 512)).size())
+    args = parser.parse_args()
+
+    dimension = args.dimension
+    heads = args.heads
+    dropout = args.dropout
+
+    attention = MultiHeadAttentionLayer(
+        dimension=dimension, heads=heads, dropout=dropout
+    )
+
+    input = torch.randn((40, 200, dimension))
+    masked = torch.ones((40, 200))
+
+    assert attention(input, masked).size() == (
+        40,
+        200,
+        dimension,
+    ), "Dimension of the output tensor must be equal to the input dimension".capitalize()
+
+    masked = None
+
+    assert attention(input).size() == (
+        40,
+        200,
+        dimension,
+    ), "Dimension of the output tensor must be equal to the input dimension".capitalize()
