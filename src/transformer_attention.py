@@ -10,7 +10,11 @@ from mask import padding_mask
 
 
 def scaled_dot_product(
-    query: torch.Tensor, key: torch.Tensor, values: torch.Tensor, mask=None
+    query: torch.Tensor,
+    key: torch.Tensor,
+    values: torch.Tensor,
+    mask=None,
+    type: str = "src",
 ):
     if (
         isinstance(query, torch.Tensor)
@@ -22,8 +26,11 @@ def scaled_dot_product(
             (query.size(1) * query.size(3))
         )
 
-        if mask is not None:
+        if (mask is not None) and (type == "src"):
             result += padding_mask(mask=mask)
+
+        elif (mask is not None) and (type == "target"):
+            result += padding_mask(mask=mask, type="tgt_mask")
 
         result = torch.softmax(input=result, dim=-1)
 
