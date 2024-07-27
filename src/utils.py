@@ -39,3 +39,20 @@ def device_init(self, device: str = "mps"):
 def config():
     with open("./config.yml", "r") as file:
         return yaml.safe_load(file)
+
+
+english = [
+    "The sun is shining brightly today",
+    "I enjoy reading books on rainy afternoons",
+    "The cat sat on the windowsill watching the birds",
+    "She baked a delicious chocolate cake for dessert",
+    "We went for a long walk in the park yesterday",
+]
+
+german = [
+    "Die Sonne scheint heute hell",
+    "Ich lese gerne Bücher an regnerischen Nachmittagen",
+    "Die Katze saß auf der Fensterbank und beobachtete die Vögel",
+    "Sie hat einen leckeren Schokoladenkuchen zum Nachtisch gebacken",
+    "Wir haben gestern einen langen Spaziergang im Park gemacht",
+]
