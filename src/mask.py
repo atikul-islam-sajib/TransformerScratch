@@ -2,6 +2,8 @@ import sys
 import torch
 import torch.nn as nn
 
+sys.path.append("/src/")
+
 
 def padding_mask(mask: torch.Tensor):
     mask = torch.where(mask == 0.0, float("-inf"), mask)
