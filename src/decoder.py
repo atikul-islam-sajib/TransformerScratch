@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_decoder_layers",
         type=int,
-        default=6,
+        default=8,
         help="Number of decoder layers".capitalize(),
     )
     parser.add_argument(
@@ -117,6 +117,10 @@ if __name__ == "__main__":
     ), "Dimension mismatch in the decoder".title()
 
     if args.display:
+        print(
+            "Total parameters of the decoder transformer: ",
+            sum(params.numel() for params in decoderTransformer.parameters()),
+        )
         path = config()["path"]["FILES_PATH"]
 
         draw_graph(

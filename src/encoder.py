@@ -88,12 +88,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--display", type=bool, default=False, help="Display the model".capitalize()
     )
+    parser.add_argument(
+        "--num_encoder_layers",
+        type=int,
+        default=8,
+        help="Number of encoder layers".capitalize(),
+    )
 
     args = parser.parse_args()
 
     d_model = args.d_model
     nheads = args.nhead
     feedforward = args.feedforward
+    num_encoder_layers = args.num_encoder_layers
     dropout = args.dropout
     epsilon = args.epsilon
     display = args.display
@@ -108,6 +115,7 @@ if __name__ == "__main__":
         dropout=dropout,
         layer_norm_eps=epsilon,
         display=display,
+        num_encoder_layers=num_encoder_layers,
     )
 
     assert encoderTransformer(input, masked).size() == (
