@@ -6,6 +6,7 @@ import torch.nn as nn
 sys.path.append("/src/")
 
 from layer_normalization import LayerNormalization
+from feedforward_network import PointWiseFeedForward
 from multihead_attention import MultiHeadAttentionLayer
 from encoder_decoder_attention import MultiCrossAttentionLayer
 
@@ -15,6 +16,7 @@ class DecoderBlock(nn.Module):
         self,
         dimension: int = 512,
         heads: int = 8,
+        feedforward: int = 2048,
         dropout: float = 0.1,
         epsilon: float = 1e-6,
     ):
@@ -22,19 +24,30 @@ class DecoderBlock(nn.Module):
 
         self.dimension = dimension
         self.heads = heads
+        self.feedforward = feedforward
         self.dropout = dropout
         self.epsilon = epsilon
 
         self.masked_multihead_attention = MultiHeadAttentionLayer(
-            dimension=self.dimension, heads=self.heads, dropout=self.dropout
+            dimension=self.dimension,
+            heads=self.heads,
+            dropout=self.dropout,
         )
 
         self.layer_norm = LayerNormalization(
-            normalized_shape=self.dimension, epsilon=self.epsilon
+            normalized_shape=self.dimension,
+            epsilon=self.epsilon,
         )
 
         self.encoder_deecoder_attention = MultiCrossAttentionLayer(
-            dimension=self.dimension, heads=self.heads, dropout=self.dropout
+            dimension=self.dimension,
+            heads=self.heads,
+            dropout=self.dropout,
+        )
+
+        self.feedforward_network = PointWiseFeedForward(
+            in_features=self.dimension,
+            dropout=self.dropout,
         )
 
     def forward(self, x: torch.Tensor, y: torch.Tensor, mask=None):
@@ -48,13 +61,19 @@ class DecoderBlock(nn.Module):
 
             residual = y
 
-            y = self.encoder_deecoder_attention(x=x, y=y)
+            y = self.encoder_deecoder_attention(x=x, y=y, mask=None)
+            y = torch.dropout(input=y, p=self.dropout, train=self.training)
+            y = torch.add(y, residual)
+            y = self.layer_norm(y)
+
+            residual = y
+
+            y = self.feedforward_network(y)
             y = torch.dropout(input=y, p=self.dropout, train=self.training)
             y = torch.add(y, residual)
             y = self.layer_norm(y)
 
             return y
-
         else:
             raise TypeError("Input must be a torch.Tensor".capitalize())
 
