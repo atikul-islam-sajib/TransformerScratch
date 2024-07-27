@@ -39,7 +39,34 @@ class EmbeddingLayer(nn.Module):
 
 
 if __name__ == "__main__":
-    embedding = EmbeddingLayer(vocabulary_size=100, sequence_length=200, dimension=512)
-    input_ids = torch.randint(0, 100, (400, 200))
+    parser = argparse.ArgumentParser(
+        description="Embedding Layer for Transformer".title()
+    )
+    parser.add_argument(
+        "--vocab_size", type=int, default=100, help="Vocabulary Size".capitalize()
+    )
+    parser.add_argument(
+        "--seq_len", type=int, default=200, help="Sequence Length".capitalize()
+    )
+    parser.add_argument(
+        "--dim", type=int, default=512, help="Dimension of the Model".capitalize()
+    )
 
-    print(embedding(input_ids).size())
+    args = parser.parse_args()
+
+    sequence_length = args.seq_len
+    vocabulary_size = args.vocab_size
+    model_dimension = args.dim
+
+    embedding = EmbeddingLayer(
+        vocabulary_size=vocabulary_size,
+        sequence_length=sequence_length,
+        dimension=model_dimension,
+    )
+    input_ids = torch.randint(0, vocabulary_size, (400, sequence_length))
+
+    assert embedding(input_ids).size() == (
+        400,
+        sequence_length,
+        model_dimension,
+    ), "Dimension Mismatch in the embedding layer".title()
