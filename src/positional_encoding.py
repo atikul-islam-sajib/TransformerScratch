@@ -8,11 +8,14 @@ sys.path.append("/src/")
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, sequence_length: int = 200, dimension: int = 512):
+    def __init__(
+        self, sequence_length: int = 200, dimension: int = 512, constant: int = 10000
+    ):
         super(PositionalEncoding, self).__init__()
 
         self.sequence_length = sequence_length
         self.model_dimension = dimension
+        self.constant = constant
 
         self.position_encode = torch.ones((sequence_length, dimension))
 
@@ -20,11 +23,11 @@ class PositionalEncoding(nn.Module):
             for index in range(self.model_dimension):
                 if index % 2 == 0:
                     self.position_encode[position, index] = math.sin(
-                        position / 10000 ** (2 * index / self.model_dimension)
+                        position / self.constant ** (2 * index / self.model_dimension)
                     )
                 elif index % 2 != 0:
                     self.position_encode[position, index] = math.cos(
-                        position / 10000 ** (2 * index / self.model_dimension)
+                        position / self.constant ** (2 * index / self.model_dimension)
                     )
 
         self.register_buffer("position_encoding", self.position_encode)
