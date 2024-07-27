@@ -2,6 +2,7 @@ import sys
 import math
 import torch
 import argparse
+from tqdm import tqdm
 import torch.nn as nn
 
 sys.path.append("/src/")
@@ -19,7 +20,7 @@ class PositionalEncoding(nn.Module):
 
         self.position_encode = torch.ones((sequence_length, dimension))
 
-        for position in range(self.sequence_length):
+        for position in tqdm(range(self.sequence_length)):
             for index in range(self.model_dimension):
                 if index % 2 == 0:
                     self.position_encode[position, index] = math.sin(
