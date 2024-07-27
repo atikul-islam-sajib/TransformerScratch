@@ -5,7 +5,7 @@ import torch.nn as nn
 
 sys.path.append("/src/")
 
-from scaled_dot_product import scaled_dot_product
+from transformer_attention import scaled_dot_product
 
 
 class MultiHeadAttentionLayer(nn.Module):

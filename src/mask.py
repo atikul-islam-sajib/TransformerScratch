@@ -10,4 +10,4 @@ def padding_mask(mask: torch.Tensor):
 
 if __name__ == "__main__":
     mask = padding_mask(mask=torch.ones((40, 200)))
-    print(mask.size())
+    assert mask.size() == (40, 1, 1, 200)
