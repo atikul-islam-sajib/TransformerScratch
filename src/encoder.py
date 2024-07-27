@@ -18,6 +18,7 @@ class TransformerEncoder(nn.Module):
         d_model: int = 512,
         nhead: int = 8,
         dim_feedforward: int = 2048,
+        num_encoder_layers: int = 8,
         dropout: float = 0.1,
         layer_norm_eps: float = 1e-6,
         display: bool = False,
@@ -28,6 +29,7 @@ class TransformerEncoder(nn.Module):
         self.dimension = d_model
         self.heads = nhead
         self.feedforward = dim_feedforward
+        self.num_encoder_layers = num_encoder_layers
         self.dropout = dropout
         self.epsilon = layer_norm_eps
         self.display = display
@@ -41,7 +43,7 @@ class TransformerEncoder(nn.Module):
                     dropout=self.dropout,
                     epsilon=self.epsilon,
                 )
-                for _ in tqdm(range(self.heads))
+                for _ in tqdm(range(self.num_encoder_layers))
             ]
         )
 

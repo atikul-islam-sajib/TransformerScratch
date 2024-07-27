@@ -2,6 +2,7 @@ import os
 import sys
 import torch
 import argparse
+from tqdm import tqdm
 import torch.nn as nn
 from torchview import draw_graph
 
@@ -41,7 +42,7 @@ class TransformerDecoder(nn.Module):
                     dropout=self.dropout,
                     epsilon=self.epsilon,
                 )
-                for _ in range(self.number_of_layers)
+                for _ in tqdm(range(self.number_of_layers))
             ]
         )
 
