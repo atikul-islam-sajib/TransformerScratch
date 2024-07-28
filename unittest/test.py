@@ -69,149 +69,149 @@ class UnitTest(unittest.TestCase):
         self.transformer = Transformer(
             d_model=self.dimension,
             nhead=self.nheads,
-            num_encoder_layers=12,
-            num_decoder_layers=12,
+            num_encoder_layers=6,
+            num_decoder_layers=6,
             dim_feedforward=self.feedforward,
         )
 
     def tearDown(self):
         pass
 
-    # def test_embedding_layer(self):
-    #     inputs = torch.randint(
-    #         0 // self.vocabulary_size,
-    #         self.vocabulary_size,
-    #         (self.vocabulary_size // 2, self.sequence_length),
-    #     )
+    def test_embedding_layer(self):
+        inputs = torch.randint(
+            0 // self.vocabulary_size,
+            self.vocabulary_size,
+            (self.vocabulary_size // 2, self.sequence_length),
+        )
 
-    #     self.assertEqual(
-    #         self.embedding(inputs).size(),
-    #         torch.Size(
-    #             [self.vocabulary_size // 2, self.sequence_length, self.dimension]
-    #         ),
-    #     )
+        self.assertEqual(
+            self.embedding(inputs).size(),
+            torch.Size(
+                [self.vocabulary_size // 2, self.sequence_length, self.dimension]
+            ),
+        )
 
-    # def test_embedding_with_batch_size(self):
-    #     inputs = torch.randint(
-    #         0 // self.vocabulary_size,
-    #         self.vocabulary_size,
-    #         (self.vocabulary_size // 2, self.sequence_length),
-    #     )
+    def test_embedding_with_batch_size(self):
+        inputs = torch.randint(
+            0 // self.vocabulary_size,
+            self.vocabulary_size,
+            (self.vocabulary_size // 2, self.sequence_length),
+        )
 
-    #     dataloader = DataLoader(inputs, batch_size=self.batch_size, shuffle=False)
+        dataloader = DataLoader(inputs, batch_size=self.batch_size, shuffle=False)
 
-    #     dataset = next(iter(dataloader))
+        dataset = next(iter(dataloader))
 
-    #     self.assertEqual(
-    #         self.embedding(dataset).size(),
-    #         torch.Size([self.batch_size, self.sequence_length, self.dimension]),
-    #     )
+        self.assertEqual(
+            self.embedding(dataset).size(),
+            torch.Size([self.batch_size, self.sequence_length, self.dimension]),
+        )
 
-    # def test_positional_encoding(self):
+    def test_positional_encoding(self):
 
-    #     self.assertTrue(self.dimension % self.nheads == 0)
+        self.assertTrue(self.dimension % self.nheads == 0)
 
-    #     query = torch.randn(
-    #         (
-    #             self.batch_size,
-    #             self.nheads,
-    #             self.sequence_length,
-    #             self.dimension // self.nheads,
-    #         )
-    #     )
-    #     key = torch.randn(
-    #         (
-    #             self.batch_size,
-    #             self.nheads,
-    #             self.sequence_length,
-    #             self.dimension // self.nheads,
-    #         )
-    #     )
+        query = torch.randn(
+            (
+                self.batch_size,
+                self.nheads,
+                self.sequence_length,
+                self.dimension // self.nheads,
+            )
+        )
+        key = torch.randn(
+            (
+                self.batch_size,
+                self.nheads,
+                self.sequence_length,
+                self.dimension // self.nheads,
+            )
+        )
 
-    #     results = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(
-    #         self.dimension // self.nheads
-    #     )
-    #     self.assertEqual(
-    #         results.size(),
-    #         torch.Size(
-    #             [
-    #                 self.batch_size,
-    #                 self.nheads,
-    #                 self.sequence_length,
-    #                 self.sequence_length,
-    #             ]
-    #         ),
-    #     )
+        results = torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(
+            self.dimension // self.nheads
+        )
+        self.assertEqual(
+            results.size(),
+            torch.Size(
+                [
+                    self.batch_size,
+                    self.nheads,
+                    self.sequence_length,
+                    self.sequence_length,
+                ]
+            ),
+        )
 
-    #     positional_encoding = self.positional_encoding(
-    #         x=torch.randn((self.batch_size, self.sequence_length, self.dimension))
-    #     )
+        positional_encoding = self.positional_encoding(
+            x=torch.randn((self.batch_size, self.sequence_length, self.dimension))
+        )
 
-    #     self.assertEqual(
-    #         positional_encoding.size(),
-    #         torch.Size([self.sequence_length, self.dimension]),
-    #     )
+        self.assertEqual(
+            positional_encoding.size(),
+            torch.Size([self.sequence_length, self.dimension]),
+        )
 
-    # def test_feedforward_network(self):
-    #     inputs = torch.randn((self.batch_size, self.sequence_length, self.dimension))
-    #     result = self.feedforward_network(inputs)
+    def test_feedforward_network(self):
+        inputs = torch.randn((self.batch_size, self.sequence_length, self.dimension))
+        result = self.feedforward_network(inputs)
 
-    #     self.assertEqual(result.size(), inputs.size())
+        self.assertEqual(result.size(), inputs.size())
 
-    # def test_layer_normalization(self):
-    #     inputs = torch.randn((self.batch_size, self.sequence_length, self.dimension))
+    def test_layer_normalization(self):
+        inputs = torch.randn((self.batch_size, self.sequence_length, self.dimension))
 
-    #     self.assertEqual(self.layer_norm(inputs).size(), inputs.size())
+        self.assertEqual(self.layer_norm(inputs).size(), inputs.size())
 
-    # def test_multihead_attention(self):
-    #     inputs = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+    def test_multihead_attention(self):
+        inputs = torch.randn(self.batch_size, self.sequence_length, self.dimension)
 
-    #     self.assertEqual(self.multihead_attention(inputs).size(), inputs.size())
+        self.assertEqual(self.multihead_attention(inputs).size(), inputs.size())
 
-    #     encoder_masked = torch.randn(self.batch_size, self.sequence_length)
+        encoder_masked = torch.randn(self.batch_size, self.sequence_length)
 
-    #     self.assertEqual(
-    #         self.multihead_attention(inputs, encoder_masked).size(), inputs.size()
-    #     )
+        self.assertEqual(
+            self.multihead_attention(inputs, encoder_masked).size(), inputs.size()
+        )
 
-    # def test_encoder(self):
-    #     inputs = torch.randn(self.batch_size, self.sequence_length, self.dimension)
-    #     encoder_padding_masked = None
+    def test_encoder(self):
+        inputs = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        encoder_padding_masked = None
 
-    #     self.assertEqual(
-    #         self.encoder(x=inputs, mask=encoder_padding_masked).size(), inputs.size()
-    #     )
+        self.assertEqual(
+            self.encoder(x=inputs, mask=encoder_padding_masked).size(), inputs.size()
+        )
 
-    #     encoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
+        encoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
 
-    #     self.assertEqual(
-    #         self.encoder(x=inputs, mask=encoder_padding_masked).size(), inputs.size()
-    #     )
+        self.assertEqual(
+            self.encoder(x=inputs, mask=encoder_padding_masked).size(), inputs.size()
+        )
 
-    # def test_decoder_block(self):
-    #     X = torch.randn(self.batch_size, self.sequence_length, self.dimension)
-    #     y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
-    #     decoder_padding_masked = None
+    def test_decoder_block(self):
+        X = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        decoder_padding_masked = None
 
-    #     self.assertEqual(self.decoder_block(X, y).size(), y.size())
+        self.assertEqual(self.decoder_block(X, y).size(), y.size())
 
-    #     decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
+        decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
 
-    #     self.assertEqual(
-    #         self.decoder_block(X, y, decoder_padding_masked).size(), y.size()
-    #     )
+        self.assertEqual(
+            self.decoder_block(X, y, decoder_padding_masked).size(), y.size()
+        )
 
-    # def test_decoder(self):
-    #     x = torch.randn(self.batch_size, self.sequence_length, self.dimension)
-    #     y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+    def test_decoder(self):
+        x = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
 
-    #     decoder_padding_masked = None
+        decoder_padding_masked = None
 
-    #     self.assertEqual(self.decoder(x, y).size(), y.size())
+        self.assertEqual(self.decoder(x, y).size(), y.size())
 
-    #     decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
+        decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
 
-    #     self.assertEqual(self.decoder(x, y, decoder_padding_masked).size(), y.size())
+        self.assertEqual(self.decoder(x, y, decoder_padding_masked).size(), y.size())
 
     def test_transformer(self):
         text_tokenizer_inputs = torch.randint(
