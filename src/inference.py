@@ -4,5 +4,5 @@ from transformers import AutoTokenizer
 
 sys.path.append("/src/")
 
-from dataloader import tokenizer
+from tokenizer import tokenizer
 from embedding_layer import EmbeddingLayer
