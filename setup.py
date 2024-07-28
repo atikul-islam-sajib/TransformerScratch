@@ -8,7 +8,7 @@ def requirements():
 
 setup(
     name="TransformerScratch",
-    version="0.1.0",
+    version="0.0.1",
     description="A deep learning project that is build for NLP based task using Transformer",
     author="Atikul Islam Sajib",
     author_email="atikul.sajib@ptb.de",
@@ -21,7 +21,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.9",
     ],
-    keywords="CCGAN : machine-learning",
+    keywords="TransformerScratch : machine-learning",
     project_urls={
         "Bug Tracker": "https://github.com/atikul-islam-sajib/TransformerScratch.git/issues",
         "Documentation": "https://github.com/atikul-islam-sajib/TransformerScratch.git",
