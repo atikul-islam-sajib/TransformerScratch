@@ -2,7 +2,7 @@ import sys
 import torch
 import torch.nn as nn
 
-sys.path.append("/src/")
+sys.path.append("./src/")
 
 
 def padding_mask(mask: torch.Tensor):

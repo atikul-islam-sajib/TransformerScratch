@@ -2,7 +2,7 @@ import os
 import sys
 from transformers import AutoTokenizer
 
-sys.path.append("/src/")
+sys.path.append("./src/")
 
 from utils import english, german, config, dump
 from torch.utils.data import DataLoader, TensorDataset

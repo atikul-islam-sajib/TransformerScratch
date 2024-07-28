@@ -6,7 +6,7 @@ from tqdm import tqdm
 import torch.nn as nn
 from torchview import draw_graph
 
-sys.path.append("/src/")
+sys.path.append("./src/")
 
 from utils import config
 from encoder_block import EncoderBlock

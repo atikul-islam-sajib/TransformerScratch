@@ -3,7 +3,7 @@ import torch
 import argparse
 import torch.nn as nn
 
-sys.path.append("/src/")
+sys.path.append("./src/")
 
 from positional_encoding import PositionalEncoding
 

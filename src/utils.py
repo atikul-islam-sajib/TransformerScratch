@@ -1,6 +1,9 @@
+import sys
 import yaml
 import joblib
 import torch
+
+sys.path.append("./src/")
 
 
 class CustomException(Exception):

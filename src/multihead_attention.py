@@ -3,7 +3,7 @@ import torch
 import argparse
 import torch.nn as nn
 
-sys.path.append("/src/")
+sys.path.append("./src/")
 
 from transformer_attention import scaled_dot_product
 
