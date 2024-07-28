@@ -74,7 +74,8 @@ class Tokenizer:
             )
 
             return {
-                "tokenizer": self.tokenizer,
+                "tokenizer_object": self.tokenizer,
+                "input_ids": input_ids,
                 "dataloader": dataloader,
                 "vocab_size": vocab_size,
             }
