@@ -1,3 +1,14 @@
 path: 
   FILES_PATH: "./artifacts/files/"
   PROCESSED_PATH: "./data/processed/"
+
+transformers:
+  MAX_LENGTH: 200
+  BATCH_SIZE: 40
+  EMBEDDING_DIMENSION: 512
+  NUM_ENCODER_LAYERS: 8
+  NUM_DECODER_LAYERS: 8
+  NUM_HEADS: 8
+  DIM_FEEDFORWARD: 2048
+  DROPOUT: 0.1
+  LAYER_NORM_EPS: 1e-5
