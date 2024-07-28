@@ -74,6 +74,7 @@ class Tokenizer:
             )
 
             return {
+                "tokenizer": self.tokenizer,
                 "dataloader": dataloader,
                 "vocab_size": vocab_size,
             }
