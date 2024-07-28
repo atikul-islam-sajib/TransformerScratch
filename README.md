@@ -16,7 +16,7 @@ To get started, clone the repository and install the required dependencies. It i
 
 ```bash
 git clone https://github.com/atikul-islam-sajib/TransformerScratch.git
-cd TransformerEncoderScratch
+cd TransformerScratch
 ```
 
 ### Set Up the Environment
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-The repository provides scripts and notebooks to help you understand and experiment with the Transformer Encoder. Below is an example script that demonstrates how to initialize the Transformer Encoder, create random input tensors, and print the shapes of the embedding and output tensors.
+The repository provides scripts and notebooks to help you understand and experiment with the Transformer. Below is an example script that demonstrates how to initialize the Transformer, create random input tensors, and print the shapes of the embedding and output tensors.
 
 ## Project Structure
 ```
