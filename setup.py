@@ -7,7 +7,7 @@ def requirements():
 
 
 setup(
-    name="Transformer",
+    name="TransformerScratch",
     version="0.1.0",
     description="A deep learning project that is build for NLP based task using Transformer",
     author="Atikul Islam Sajib",
