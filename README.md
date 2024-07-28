@@ -1,4 +1,4 @@
-# TransformerScratch
+# Transformer Implementation by Scratch using PyTorch
 
 This repository contains an implementation of a Transformer model from scratch using PyTorch. The Transformer architecture is a cornerstone of modern natural language processing (NLP) tasks, enabling efficient and scalable attention mechanisms.
 
