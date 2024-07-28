@@ -7,6 +7,7 @@ sys.path.append("/src/")
 from embedding_layer import EmbeddingLayer
 from torch.utils.data import DataLoader, TensorDataset
 from encoder import TransformerEncoder
+from decoder import TransformerDecoder
 
 english = [
     "The sun is shining brightly today",

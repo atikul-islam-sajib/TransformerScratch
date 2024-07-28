@@ -1,2 +1,3 @@
 path: 
   FILES_PATH: "./artifacts/files/"
+  PROCESSED_PATH: "./data/processed/"
