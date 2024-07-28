@@ -113,3 +113,96 @@ for (english_batch, english_padding_mask), (german_batch, german_padding_mask) i
     )
     print(transformer_output.size())
     break  # Test with only the first batch
+
+
+####################################################################################################################
+####################################################################################################################
+#                            THIS IS ANOTHER APPROACH THAT YOU CAN USE TO RUN THE TRANSFORMER                      #
+####################################################################################################################
+####################################################################################################################
+
+from transformers import AutoTokenizer
+from torch.utils.data import DataLoader, TensorDataset
+
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+
+############################
+#          English         #
+############################
+
+english_tokenizer = tokenizer(
+    english,
+    padding="max_length",
+    truncation=True,
+    return_tensors="pt",
+    max_length=MAX_LENGTH,
+)
+
+print("Tokenized Input IDs:", english_tokenizer["input_ids"].size())
+print("Attention Mask:", english_tokenizer["attention_mask"].size())
+
+print("*" * 50, "\n")
+
+english_vocab_size = tokenizer.vocab_size
+
+english_tokenizer_results = TensorDataset(
+    english_tokenizer["input_ids"], english_tokenizer["attention_mask"]
+)
+english_tokenizer_dataloader = DataLoader(
+    english_tokenizer_results, batch_size=BATCH_SIZE, shuffle=True
+)
+
+############################
+#          German          #
+############################
+
+german_tokenizer = tokenizer(
+    german,
+    padding="max_length",
+    truncation=True,
+    return_tensors="pt",
+    max_length=MAX_LENGTH,
+)
+
+print("Tokenized Input IDs:", german_tokenizer["input_ids"].size())
+print("Attention Mask:", german_tokenizer["attention_mask"].size())
+
+print("*" * 50, "\n")
+
+german_vocab_size = tokenizer.vocab_size
+
+german_tokenizer_results = TensorDataset(
+    german_tokenizer["input_ids"], german_tokenizer["attention_mask"]
+)
+german_tokenizer_dataloader = DataLoader(
+    german_tokenizer_results, batch_size=BATCH_SIZE, shuffle=True
+)
+
+###########################
+#         Embedding       #
+###########################
+
+assert german_vocab_size == english_vocab_size, "Vocabulary sizes must be equal"
+
+embedding = EmbeddingLayer(
+    vocabulary_size=english_vocab_size,
+    sequence_length=MAX_LENGTH,
+    dimension=EMBEDDING_DIMENSION,
+)
+
+# Test the Transformer with embeddings
+for (english_batch, english_padding_mask), (german_batch, german_padding_mask) in zip(
+    english_tokenizer_dataloader, german_tokenizer_dataloader
+):
+    english_embeddings = embedding(english_batch)
+    german_embeddings = embedding(german_batch)
+
+    transformer_output = transformer_model(
+        x=english_embeddings,
+        y=german_embeddings,
+        encoder_padding_mask=english_padding_mask,
+        decoder_padding_mask=german_padding_mask,
+    )
+    print(transformer_output.size())
+    break  # Test with only the first batch
