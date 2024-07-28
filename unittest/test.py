@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import unittest
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.append("./src/")
 
@@ -13,6 +13,9 @@ from feedforward_network import PointWiseFeedForward
 from layer_normalization import LayerNormalization
 from multihead_attention import MultiHeadAttentionLayer
 from encoder import TransformerEncoder
+from decoder_block import DecoderBlock
+from decoder import TransformerDecoder
+from transformer import Transformer
 
 
 class UnitTest(unittest.TestCase):
@@ -49,6 +52,26 @@ class UnitTest(unittest.TestCase):
             d_model=self.dimension,
             nhead=self.nheads,
             num_encoder_layers=6,
+        )
+
+        self.decoder_block = DecoderBlock(
+            dimension=self.dimension,
+            heads=self.nheads,
+            feedforward=self.feedforward,
+        )
+
+        self.decoder = TransformerDecoder(
+            d_model=self.dimension,
+            nhead=self.nheads,
+            num_decoder_layers=6,
+        )
+
+        self.transformer = Transformer(
+            d_model=self.dimension,
+            nhead=self.nheads,
+            num_encoder_layers=6,
+            num_decoder_layers=6,
+            dim_feedforward=self.feedforward,
         )
 
     def tearDown(self):
@@ -163,6 +186,84 @@ class UnitTest(unittest.TestCase):
 
         self.assertEqual(
             self.encoder(x=inputs, mask=encoder_padding_masked).size(), inputs.size()
+        )
+
+    def test_decoder_block(self):
+        X = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        decoder_padding_masked = None
+
+        self.assertEqual(self.decoder_block(X, y).size(), y.size())
+
+        decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
+
+        self.assertEqual(
+            self.decoder_block(X, y, decoder_padding_masked).size(), y.size()
+        )
+
+    def test_decoder(self):
+        x = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+        y = torch.randn(self.batch_size, self.sequence_length, self.dimension)
+
+        decoder_padding_masked = None
+
+        self.assertEqual(self.decoder(x, y).size(), y.size())
+
+        decoder_padding_masked = torch.randn(self.batch_size, self.sequence_length)
+
+        self.assertEqual(self.decoder(x, y, decoder_padding_masked).size(), y.size())
+
+    def test_transformer(self):
+        text_tokenizer_inputs = torch.randint(
+            0, self.vocabulary_size, (self.batch_size * 5, self.sequence_length)
+        )
+        attention_masked_inputs = torch.randint(
+            0, 2, (self.batch_size * 5, self.sequence_length)
+        )
+
+        datasets_inputs = TensorDataset(text_tokenizer_inputs, attention_masked_inputs)
+        dataloader_inputs = DataLoader(
+            datasets_inputs, batch_size=self.batch_size, shuffle=False
+        )
+
+        ###############################################################################
+
+        text_tokenizer_target = torch.randint(
+            0, self.vocabulary_size, (self.batch_size * 5, self.sequence_length)
+        )
+        attention_masked_targets = torch.randint(
+            0, 2, (self.batch_size * 5, self.sequence_length)
+        )
+
+        datasets_target = TensorDataset(text_tokenizer_target, attention_masked_targets)
+        dataloader_target = DataLoader(
+            datasets_target, batch_size=self.batch_size, shuffle=False
+        )
+
+        self.assertEqual(
+            attention_masked_inputs.size(), attention_masked_targets.size()
+        )
+
+        x, encoded_padding_masked = next(iter(dataloader_inputs))
+        y, decoded_padding_masked = next(iter(dataloader_target))
+
+        input_embedding = self.embedding(x)
+        ouput_embedding = self.embedding(y)
+
+        self.assertEqual(encoded_padding_masked.size(), decoded_padding_masked.size())
+
+        self.assertEqual(input_embedding.size(), ouput_embedding.size())
+
+        result = self.transformer(
+            x=input_embedding,
+            y=ouput_embedding,
+            encoder_padding_mask=encoded_padding_masked,
+            decoder_padding_mask=decoded_padding_masked,
+        )
+
+        self.assertEqual(
+            result.size(),
+            input_embedding.size(),
         )
 
 
