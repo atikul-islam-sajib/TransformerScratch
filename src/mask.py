@@ -12,7 +12,7 @@ def padding_mask(mask: torch.Tensor):
 
 def target_mask(sequence_length: int = 200):
     mask = torch.triu(input=torch.ones((sequence_length, sequence_length)), diagonal=1)
-    mask = torch.where(mask == 1.0, float("-inf"), mask)
+    mask = torch.where(mask == 0.0, mask, float("-inf"))
     return mask
 
 
